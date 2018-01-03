@@ -1,7 +1,5 @@
 package org.vibrant.core.util
 
-import org.vibrant.core.account.Account
-import sun.misc.BASE64Encoder
 import java.security.*
 
 
@@ -33,5 +31,16 @@ object AccountUtils {
         sig.initVerify(publicKey)
         sig.update(data.toByteArray(charset("UTF8")))
         return sig.verify(signature)
+    }
+
+    fun signData(data: ByteArray, keyPair: KeyPair): ByteArray {
+        val sig = Signature.getInstance("SHA1WithRSA")
+        sig.initSign(keyPair.private)
+        sig.update(data)
+        val signatureBytes = sig.sign()
+        sig.initVerify(keyPair.public)
+        sig.update(data)
+        sig.verify(signatureBytes)
+        return signatureBytes
     }
 }
