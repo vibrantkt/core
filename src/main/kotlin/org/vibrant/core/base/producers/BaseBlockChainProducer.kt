@@ -6,10 +6,11 @@ import org.vibrant.core.base.models.BaseBlockModel
 import org.vibrant.core.base.models.BaseTransactionModel
 import org.vibrant.core.models.BlockModel
 import org.vibrant.core.models.TransactionModel
+import org.vibrant.core.producers.BlockChainProducer
 import org.vibrant.core.reducers.ModelSerializer
 import java.util.*
 
-class BaseBlockChainProducer(): ModelProducer<BaseBlockChainModel>(){
+class BaseBlockChainProducer : BlockChainProducer<BaseBlockChainModel>(){
 
     val blocks = arrayListOf(
             this.createGenesisBlock()

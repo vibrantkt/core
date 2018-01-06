@@ -3,10 +3,12 @@ package org.vibrant.core.base
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.vibrant.core.base.jsonrpc.JSONRPCEntity
+import org.vibrant.core.base.jsonrpc.JSONRPCRequest
+import org.vibrant.core.base.jsonrpc.JSONRPCResponse
 import org.vibrant.core.base.models.BaseBlockChainModel
 import org.vibrant.core.base.models.BaseBlockModel
 import org.vibrant.core.base.models.BaseTransactionModel
-import org.vibrant.core.models.BlockChainModel
 import org.vibrant.core.models.Model
 import org.vibrant.core.reducers.ModelSerializer
 import java.util.HashMap
@@ -16,7 +18,7 @@ import java.util.HashMap
 
 class BaseJSONSerializer : ModelSerializer(){
     override fun deserialize(serialized: String): Model {
-        val map: HashMap<String, Any> = jacksonObjectMapper().readValue(serialized, object : TypeReference<Map<String, Object>>(){})
+        val map: HashMap<String, Any> = jacksonObjectMapper().readValue(serialized, object : TypeReference<Map<String, Any>>(){})
 
         val targetType = when(map["@type"]){
             BaseTransactionModel::class.java.getAnnotation(JsonTypeName::class.java).value -> {
@@ -38,6 +40,19 @@ class BaseJSONSerializer : ModelSerializer(){
 
     override fun <T : Model> serialize(model: T): String {
         return jacksonObjectMapper().writeValueAsString(model)
+    }
+
+
+
+    fun deserializeJSONRPC(serialized: String): JSONRPCEntity {
+        val map: HashMap<String, Any> = jacksonObjectMapper().readValue(serialized, object : TypeReference<Map<String, Any>>(){})
+        return if(map.containsKey("method")){
+            jacksonObjectMapper().readValue(serialized, JSONRPCRequest::class.java)
+        }else if(map.containsKey("result") || map.containsKey("error")){
+            jacksonObjectMapper().readValue(serialized, JSONRPCResponse::class.java)
+        }else{
+            TODO()
+        }
     }
 
 }
