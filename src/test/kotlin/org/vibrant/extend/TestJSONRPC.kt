@@ -7,6 +7,7 @@ import org.vibrant.core.base.jsonrpc.JSONRPCRequest
 import org.vibrant.core.base.jsonrpc.JSONRPCResponse
 import org.vibrant.core.base.node.BaseJSONRPCProtocol
 import org.vibrant.core.base.node.BaseNode
+import org.vibrant.core.node.RemoteNode
 
 class TestJSONRPC {
 
@@ -16,12 +17,12 @@ class TestJSONRPC {
         val request = JSONRPCResponse(
                 result = "Hood",
                 error = null,
-                id = "1"
+                id = 1
         )
 
         val serialized = BaseJSONSerializer().serialize(request)
         assertEquals(
-                "{\"result\":\"Hood\",\"error\":null,\"id\":\"1\",\"version\":\"2.0\"}",
+                "{\"result\":\"Hood\",\"error\":null,\"id\":1,\"version\":\"2.0\"}",
                 serialized
         )
     }
@@ -31,7 +32,7 @@ class TestJSONRPC {
         val request = JSONRPCResponse(
                 result = "Hood",
                 error = null,
-                id = "1"
+                id = 1
         )
 
         val serialized = BaseJSONSerializer().serialize(request)
@@ -47,7 +48,7 @@ class TestJSONRPC {
         val request = JSONRPCRequest(
                 "callWithNoParams",
                 arrayOf(),
-                "1"
+                1
         )
 
         val serialized = BaseJSONSerializer().serialize(request)
@@ -62,7 +63,7 @@ class TestJSONRPC {
         val request = JSONRPCRequest(
                 "callWithNoParams",
                 arrayOf(),
-                "1"
+                1
         )
 
         val serialized = BaseJSONSerializer().serialize(request)
@@ -80,7 +81,7 @@ class TestJSONRPC {
         val request = JSONRPCRequest(
                 "echo",
                 arrayOf("Hello"),
-                "1"
+                1
         )
 
         val fakeProtocol = BaseJSONRPCProtocol(BaseNode(1324))
@@ -88,9 +89,9 @@ class TestJSONRPC {
 
 
 
-        val some = fakeProtocol.invoke(request)
+        val some = fakeProtocol.invoke(request, RemoteNode("localhost", 1234))
         assertEquals(
-                JSONRPCResponse(result="Hello", error=null, id="1", version="2.0"),
+                JSONRPCResponse(result="Hello", error=null, id=1, version="2.0"),
                 some
         )
 

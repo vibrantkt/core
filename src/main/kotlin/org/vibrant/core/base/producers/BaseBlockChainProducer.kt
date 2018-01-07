@@ -69,4 +69,21 @@ class BaseBlockChainProducer(val difficulty: Int = 1) : BlockChainProducer<BaseB
         )
     }
 
+
+
+    fun dump(blockChainModel: BaseBlockChainModel){
+        this.blocks.clear()
+        this.blocks.addAll(blockChainModel.blocks)
+    }
+
+    companion object {
+
+        fun instantiate(blockChainModel: BaseBlockChainModel): BaseBlockChainProducer {
+            val producer = BaseBlockChainProducer()
+            producer.blocks.clear()
+            producer.blocks.addAll(blockChainModel.blocks)
+            return producer
+        }
+    }
+
 }

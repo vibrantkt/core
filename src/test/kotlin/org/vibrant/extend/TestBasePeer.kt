@@ -4,12 +4,14 @@ import kotlinx.coroutines.experimental.async
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.vibrant.core.base.BaseJSONSerializer
+import org.vibrant.core.base.models.BaseBlockChainModel
 import org.vibrant.core.base.models.BaseMessageModel
 import org.vibrant.core.base.models.BaseTransactionModel
 import org.vibrant.core.base.node.BaseJSONRPCProtocol
 import org.vibrant.core.base.node.BaseMiner
 import org.vibrant.core.base.node.BaseNode
 import org.vibrant.core.base.node.BasePeer
+import org.vibrant.core.base.producers.BaseBlockChainProducer
 import org.vibrant.core.base.producers.BaseTransactionProducer
 import org.vibrant.core.node.RemoteNode
 import org.vibrant.core.reducers.SignatureProducer
@@ -56,20 +58,73 @@ class TestBasePeer {
 
 
     @Test
-    fun `Test peer synchronization`(){
-//        val node = BaseNode(7000)
-
+    fun `Test peer behind sync`(){
+        val node = BaseNode(7000)
         val miner = BaseMiner(7001)
 
 
-//        node.start()
-//        miner.start()
-//
-//        node.connect(RemoteNode("localhost", 7001))
+        node.start()
+        miner.start()
+
+        miner.chain.pushBlock(node.chain.createBlock(
+                listOf(),
+                BaseJSONSerializer()
+        ))
 
 
+        node.connect(RemoteNode("localhost", 7001))
+        println("Connected")
+        node.synchronize(RemoteNode("localhost", 7001))
+        println("Synced")
+
+
+        assertEquals(
+                miner.chain.produce(BaseJSONSerializer()),
+                node.chain.produce(BaseJSONSerializer())
+        )
 
         miner.stop()
+        node.stop()
+    }
+
+    @Test
+    fun `Test peer ahead sync`(){
+        val node = BaseNode(7000)
+        val miner = BaseMiner(7001)
+
+
+        async {
+            node.start()
+        }
+
+        async {
+
+            miner.start()
+        }
+
+        miner.chain.pushBlock(miner.chain.createBlock(
+                listOf(),
+                BaseJSONSerializer()
+        ))
+
+
+        miner.connect(RemoteNode("localhost", 7000))
+        println("Connected")
+        miner.synchronize(RemoteNode("localhost", 7000))
+        println("Synced")
+
+
+        Thread.sleep(1000)
+        assertEquals(
+                miner.chain.produce(BaseJSONSerializer()),
+                node.chain.produce(BaseJSONSerializer())
+        )
+
+        miner.stop()
+        node.stop()
+
+
+
     }
 
 
@@ -110,5 +165,15 @@ class TestBasePeer {
 
 
     }
+
+
+//    @Test
+//    fun `Generate beautiful chain`(){
+//        val chain = BaseBlockChainProducer(2)
+//        for(i in 0.until(100)){
+//            chain.pushBlock(chain.createBlock(listOf(), BaseJSONSerializer()))
+//        }
+//        println(BaseJSONSerializer().serialize(chain.produce(BaseJSONSerializer())))
+//    }
 
 }

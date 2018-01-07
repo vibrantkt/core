@@ -6,7 +6,7 @@ import java.util.*
 data class JSONRPCRequest(
         val method: String,
         val params: Array<Any>,
-        val id: String,
+        val id: Long,
         val version: String = "2.0"
 ): JSONRPCEntity() {
     override fun equals(other: Any?): Boolean {

@@ -12,8 +12,4 @@ abstract class AbstractPeer<in T: RemoteNode>(val port: Int){
      */
     abstract fun start()
 
-    /**
-     * Sync connect
-     */
-    abstract fun connectToPeer(remoteNode: T): Boolean
 }

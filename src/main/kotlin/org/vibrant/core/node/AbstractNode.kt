@@ -31,5 +31,4 @@ abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>
      */
     abstract fun connect(remoteNode: RemoteNode): Boolean
 
-
 }
