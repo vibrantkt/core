@@ -51,7 +51,7 @@ class BaseJSONSerializer : ModelSerializer(){
         }else if(map.containsKey("result") || map.containsKey("error")){
             jacksonObjectMapper().readValue(serialized, JSONRPCResponse::class.java)
         }else{
-            TODO()
+            throw Exception("Unexpected json rpc entity")
         }
     }
 

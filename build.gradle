@@ -26,6 +26,11 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'com.github.h0tk3y.betterParse:better-parse:0.3.2'
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21'
+// https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile 'io.github.microutils:kotlin-logging:1.4.9'
+
 
 
     testCompile 'junit:junit:4.12'

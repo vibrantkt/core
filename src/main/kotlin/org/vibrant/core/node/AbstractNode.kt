@@ -11,7 +11,7 @@ import org.vibrant.core.producers.BlockChainProducer
  */
 abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>> {
 
-    protected abstract val chain: B
+    internal abstract val chain: B
 
 
     /***
@@ -29,7 +29,7 @@ abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>
     /**
      * Connect to peer
      */
-    abstract fun connect(remoteNode: RemoteNode)
+    abstract fun connect(remoteNode: RemoteNode): Boolean
 
 
 }

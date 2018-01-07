@@ -88,12 +88,12 @@ class TestBaseBlockChain {
         ).produce(BaseJSONSerializer())
 
         val chain = BaseBlockChainProducer()
-        val b = chain.pushBlock(chain.createBlock(listOf(transaction1, transaction2), BaseJSONSerializer()))
+        val b = chain.pushBlock(chain.createBlock(listOf(transaction1, transaction2), BaseJSONSerializer(), startNonce = 0, timestamp = 0))
 
 
         val serialized = BaseJSONSerializer().serialize(chain.produce(BaseJSONSerializer()))
         assertEquals(
-                "{\"@type\":\"blockchain\",\"blocks\":[{\"@type\":\"block\",\"index\":0,\"hash\":\"Genesis block hash\",\"prevHash\":\"\",\"timestamp\":0,\"transactions\":[]},{\"@type\":\"block\",\"index\":1,\"hash\":\"${b.hash}\",\"prevHash\":\"Genesis block hash\",\"timestamp\":${b.timestamp},\"transactions\":[{\"@type\":\"transaction\",\"from\":\"User1\",\"to\":\"User2\",\"payload\":{\"@type\":\"message\",\"content\":\"Hello user 2\",\"timestamp\":${0}},\"signature\":\"${transaction1.signature}\"},{\"@type\":\"transaction\",\"from\":\"User2\",\"to\":\"User1\",\"payload\":{\"@type\":\"message\",\"content\":\"Well, hello!\",\"timestamp\":${0}},\"signature\":\"${transaction2.signature}\"}]}]}",
+                "{\"@type\":\"blockchain\",\"blocks\":[{\"@type\":\"block\",\"index\":0,\"hash\":\"Genesis block hash\",\"prevHash\":\"\",\"timestamp\":0,\"transactions\":[],\"nonce\":${0}},{\"@type\":\"block\",\"index\":1,\"hash\":\"${b.hash}\",\"prevHash\":\"Genesis block hash\",\"timestamp\":${0},\"transactions\":[{\"@type\":\"transaction\",\"from\":\"User1\",\"to\":\"User2\",\"payload\":{\"@type\":\"message\",\"content\":\"Hello user 2\",\"timestamp\":${0}},\"signature\":\"${transaction1.signature}\"},{\"@type\":\"transaction\",\"from\":\"User2\",\"to\":\"User1\",\"payload\":{\"@type\":\"message\",\"content\":\"Well, hello!\",\"timestamp\":${0}},\"signature\":\"${transaction2.signature}\"}],\"nonce\":${b.nonce}}]}",
                 serialized
         )
     }
@@ -184,7 +184,8 @@ class TestBaseBlockChain {
                 "I CHANGED HASH!",
                 "",
                 0,
-                listOf()
+                listOf(),
+                0
         )
         assertEquals(
                 false,

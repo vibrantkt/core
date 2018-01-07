@@ -15,7 +15,9 @@ class BaseBlockProducer(
         private val index: Long,
         private val prevBlockHash: String,
         private val timestamp: Long = Date().time,
-        private val transactions: List<BaseTransactionModel>
+        private val transactions: List<BaseTransactionModel>,
+        private var nonce: Long = 0,
+        private var difficulty: Int = 0
 ): BlockProducer<BaseBlockModel>(){
 
 
@@ -24,14 +26,27 @@ class BaseBlockProducer(
         val transactionsContent = transactions.map {
             return@map serializer.serialize(it)
         }.joinToString("")
-        val payload = this.index.toString() + this.prevBlockHash + this.timestamp + transactionsContent
-        val hash = HashUtils.bytesToHex(HashUtils.sha256(payload.toByteArray()))
+
+        val hash = if(difficulty == 0){
+            val payload = this.index.toString() + this.prevBlockHash + this.timestamp + transactionsContent + this.nonce
+            HashUtils.bytesToHex(HashUtils.sha256(payload.toByteArray()))
+        }else{
+            var hash: String
+            do{
+                val payload = this.index.toString() + this.prevBlockHash + this.timestamp + transactionsContent + ++this.nonce
+                hash = HashUtils.bytesToHex(HashUtils.sha256(payload.toByteArray()))
+            }while(hash.substring(0, this.difficulty) != "0".repeat(this.difficulty))
+            hash
+        }
+
+
         return BaseBlockModel(
                 index,
                 hash,
                 prevBlockHash,
                 timestamp,
-                transactions.toList()
+                transactions.toList(),
+                this.nonce
         )
     }
 }

@@ -10,11 +10,13 @@ import org.vibrant.core.producers.BlockChainProducer
 import org.vibrant.core.reducers.ModelSerializer
 import java.util.*
 
-class BaseBlockChainProducer : BlockChainProducer<BaseBlockChainModel>(){
+class BaseBlockChainProducer(val difficulty: Int = 1) : BlockChainProducer<BaseBlockChainModel>(){
 
     val blocks = arrayListOf(
             this.createGenesisBlock()
     )
+
+
 
     override fun produce(serializer: ModelSerializer): BaseBlockChainModel {
         return BaseBlockChainModel(
@@ -23,16 +25,18 @@ class BaseBlockChainProducer : BlockChainProducer<BaseBlockChainModel>(){
     }
 
 
-    private fun latestBlock(): BaseBlockModel {
+    fun latestBlock(): BaseBlockModel {
         return this.blocks.last()
     }
 
-    fun createBlock(transactions: List<BaseTransactionModel>, serializer: ModelSerializer): BaseBlockModel {
+    fun createBlock(transactions: List<BaseTransactionModel>, serializer: ModelSerializer, startNonce: Long = 0, timestamp: Long = Date().time): BaseBlockModel {
         return BaseBlockProducer(
                 this.latestBlock().index + 1,
                 this.latestBlock().hash,
-                Date().time,
-                transactions
+                timestamp,
+                transactions,
+                startNonce,
+                this.difficulty
         ).produce(serializer)
     }
 
@@ -60,7 +64,8 @@ class BaseBlockChainProducer : BlockChainProducer<BaseBlockChainModel>(){
                 "Genesis block hash",
                 "",
                 0,
-                listOf()
+                listOf(),
+                0
         )
     }
 

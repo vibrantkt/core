@@ -11,5 +11,6 @@ data class BaseBlockModel(
         val hash: String,
         val prevHash: String,
         val timestamp: Long,
-        val transactions: List<BaseTransactionModel>
+        val transactions: List<BaseTransactionModel>,
+        val nonce: Long
 ): BlockModel()

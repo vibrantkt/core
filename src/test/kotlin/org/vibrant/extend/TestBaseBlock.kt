@@ -17,7 +17,7 @@ class TestBaseBlock {
 
 
     @Test
-    fun `Base transaction producer`() {
+    fun `Base block producer`() {
         val sender = AccountUtils.generateKeyPair()
         val receiver = AccountUtils.generateKeyPair()
 
@@ -48,8 +48,9 @@ class TestBaseBlock {
                 1,
                 "prevBlockHash",
                 1000,
-                listOf(transaction1, transaction2)
-
+                listOf(transaction1, transaction2),
+                nonce = 0,
+                difficulty = 0
         ).produce(BaseJSONSerializer())
 
 
@@ -69,7 +70,18 @@ class TestBaseBlock {
                 block.prevHash
         )
 
-        val payload = (block.index.toString() + block.prevHash + block.timestamp + block.transactions.map{ return@map BaseJSONSerializer().serialize(it)}.joinToString(""))
+        val payload =
+                block.index.toString() +
+                        block.prevHash +
+                        block.timestamp +
+                        block.transactions.map{ return@map BaseJSONSerializer().serialize(it)}.joinToString("") +
+                        block.nonce
+
+        assertEquals(
+                0,
+                block.nonce
+        )
+
         assertEquals(
                 HashUtils.bytesToHex(
                         HashUtils.sha256(payload.toByteArray())
@@ -116,13 +128,13 @@ class TestBaseBlock {
 
         ).produce(BaseJSONSerializer())
 
-        val payload = (block.index.toString() + block.prevHash + block.timestamp + block.transactions.map{ return@map BaseJSONSerializer().serialize(it)}.joinToString(""))
+        val payload = (block.index.toString() + block.prevHash + block.timestamp + block.transactions.map{ return@map BaseJSONSerializer().serialize(it)}.joinToString("") + block.nonce)
         val hash = HashUtils.bytesToHex(
                 HashUtils.sha256(payload.toByteArray())
         )
 
         assertEquals(
-                "{\"@type\":\"block\",\"index\":1,\"hash\":\"$hash\",\"prevHash\":\"prevBlockHash\",\"timestamp\":1000,\"transactions\":[{\"@type\":\"transaction\",\"from\":\"User1\",\"to\":\"User2\",\"payload\":{\"@type\":\"message\",\"content\":\"Hello, user2!!\",\"timestamp\":0},\"signature\":\"${transaction1.signature}\"},{\"@type\":\"transaction\",\"from\":\"User2\",\"to\":\"User1\",\"payload\":{\"@type\":\"message\",\"content\":\"Well, hello!\",\"timestamp\":0},\"signature\":\"${transaction2.signature}\"}]}",
+                "{\"@type\":\"block\",\"index\":1,\"hash\":\"$hash\",\"prevHash\":\"prevBlockHash\",\"timestamp\":1000,\"transactions\":[{\"@type\":\"transaction\",\"from\":\"User1\",\"to\":\"User2\",\"payload\":{\"@type\":\"message\",\"content\":\"Hello, user2!!\",\"timestamp\":0},\"signature\":\"${transaction1.signature}\"},{\"@type\":\"transaction\",\"from\":\"User2\",\"to\":\"User1\",\"payload\":{\"@type\":\"message\",\"content\":\"Well, hello!\",\"timestamp\":0},\"signature\":\"${transaction2.signature}\"}],\"nonce\":0}",
                 BaseJSONSerializer().serialize(block)
         )
     }
