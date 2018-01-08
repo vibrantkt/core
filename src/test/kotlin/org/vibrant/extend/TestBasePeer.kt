@@ -1,7 +1,6 @@
 package org.vibrant.extend
 
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.*
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.vibrant.core.base.BaseJSONSerializer
@@ -9,12 +8,15 @@ import org.vibrant.core.base.jsonrpc.JSONRPCRequest
 import org.vibrant.core.base.models.BaseMessageModel
 import org.vibrant.core.base.node.BaseMiner
 import org.vibrant.core.base.node.BaseNode
+import org.vibrant.core.base.producers.BaseBlockChainProducer
 import org.vibrant.core.base.producers.BaseTransactionProducer
 import org.vibrant.core.node.RemoteNode
 import org.vibrant.core.reducers.SignatureProducer
 import org.vibrant.core.util.AccountUtils
 import org.vibrant.core.util.HashUtils
 import java.security.KeyPair
+import java.util.*
+import java.util.concurrent.CountDownLatch
 import kotlin.coroutines.experimental.suspendCoroutine
 
 class TestBasePeer {
@@ -53,6 +55,7 @@ class TestBasePeer {
                 1
         )
 
+        //cuz node isn't a
         assertEquals(
                 miner.peer.miners.size,
                 0
@@ -66,29 +69,29 @@ class TestBasePeer {
 
     @Test
     fun `Test peer return type`(){
-        val node1 = BaseNode(7000)
-        val node2 = BaseMiner(7001)
+        val node = BaseNode(7000)
+        val miner = BaseMiner(7001)
 
 
-        node1.start()
-        node2.start()
+        node.start()
+        miner.start()
 
 
-        val expectedNode = node1.rpc.nodeType(JSONRPCRequest("a", arrayOf(),1L), RemoteNode("", 0))
-        val expectedMiner = node2.rpc.nodeType(JSONRPCRequest("a", arrayOf(),1L), RemoteNode("", 0))
+        val expectedNode = node.rpc.nodeType(JSONRPCRequest("a", arrayOf(),1L), RemoteNode("", 0))
+        val expectedMiner = miner.rpc.nodeType(JSONRPCRequest("a", arrayOf(),1L), RemoteNode("", 0))
 
         assertEquals(
-                expectedNode.result.toString(),
-                "node"
+                "node",
+                expectedNode.result.toString()
         )
 
         assertEquals(
-                expectedMiner.result.toString(),
-                "miner"
+                "miner",
+                expectedMiner.result.toString()
         )
 
-        node1.stop()
-        node2.stop()
+        node.stop()
+        miner.stop()
     }
 
 
@@ -108,9 +111,7 @@ class TestBasePeer {
 
 
         node.connect(RemoteNode("localhost", 7001))
-        println("Connected")
         node.synchronize(RemoteNode("localhost", 7001))
-        println("Synced")
 
 
         assertEquals(
@@ -122,35 +123,38 @@ class TestBasePeer {
         node.stop()
     }
 
+
     @Test
     fun `Test peer ahead sync`(){
+
+        val sender = AccountUtils.generateKeyPair()
+
+        val transaction = BaseTransactionProducer(
+                "yura",
+                "vasya",
+                BaseMessageModel("Hello!", 0),
+                sender,
+                object : SignatureProducer {
+                    override fun produceSignature(content: ByteArray, keyPair: KeyPair): ByteArray {
+                        return HashUtils.signData(content, keyPair)
+                    }
+                }
+        ).produce(BaseJSONSerializer())
+
         val node = BaseNode(7000)
         val miner = BaseMiner(7001)
 
-
-        async {
-            node.start()
-        }
-
-        async {
-
-            miner.start()
-        }
+        node.start()
+        miner.start()
 
         miner.chain.pushBlock(miner.chain.createBlock(
-                listOf(),
+                listOf(transaction),
                 BaseJSONSerializer()
         ))
 
-
-
-
         miner.connect(RemoteNode("localhost", 7000))
-        println("Connected")
-        miner.synchronize(RemoteNode("localhost", 7000))
-        println("Synced")
 
-        runBlocking {
+        val change = async {
             suspendCoroutine<Unit> { s ->
                 node.chain.onChange.add { _ ->
                     s.resume(Unit)
@@ -158,21 +162,27 @@ class TestBasePeer {
             }
         }
 
+        miner.synchronize(RemoteNode("localhost", 7000))
+
+        runBlocking {
+            change.await()
+        }
+
         assertEquals(
                 miner.chain.produce(BaseJSONSerializer()),
                 node.chain.produce(BaseJSONSerializer())
         )
 
-        miner.stop()
-        node.stop()
 
+        node.stop()
+        miner.stop()
 
 
     }
 
 
     @Test
-    fun `Test miner loop`(){
+    fun `Test add transaction loop from node to miner`(){
         val miner = BaseMiner(7001)
 
         val sender = AccountUtils.generateKeyPair()
@@ -209,12 +219,93 @@ class TestBasePeer {
 
     }
 
+    @Test
+    fun `Test remote transaction handle`(){
 
+        val sender = AccountUtils.generateKeyPair()
+
+        val transaction = BaseTransactionProducer(
+                "yura",
+                "vasya",
+                BaseMessageModel("Hello!", 0),
+                sender,
+                object : SignatureProducer {
+                    override fun produceSignature(content: ByteArray, keyPair: KeyPair): ByteArray {
+                        return HashUtils.signData(content, keyPair)
+                    }
+                }
+        ).produce(BaseJSONSerializer())
+
+        val node = BaseNode(7000)
+        val miner = BaseMiner(7001)
+
+        node.start()
+        miner.start()
+
+
+        miner.connect(RemoteNode("localhost", 7000))
+        miner.synchronize(RemoteNode("localhost", 7000))
+
+
+        runBlocking {
+            val response = node.peer.send(RemoteNode("localhost", 7001), JSONRPCRequest(
+                    method = "addTransaction",
+                    params = arrayOf(BaseJSONSerializer().serialize(transaction)),
+                    id = 5
+            ))
+
+
+            assertEquals(
+                    true,
+                    response.result
+            )
+
+            suspendCoroutine<Unit>{ r->
+                async {
+                    miner.startMineLoop()
+                }
+                miner.onMined.add{
+                    r.resume(Unit)
+                }
+            }
+
+            // block is mined
+            assertEquals(
+                    2,
+                    miner.chain.blocks.size
+            )
+        }
+
+
+        node.stop()
+        miner.stop()
+
+
+
+    }
+
+//
 //    @Test
 //    fun `Generate beautiful chain`(){
 //        val chain = BaseBlockChainProducer(2)
 //        for(i in 0.until(100)){
-//            chain.pushBlock(chain.createBlock(listOf(), BaseJSONSerializer()))
+//            val sender = AccountUtils.generateKeyPair()
+//            val transactions = (0.until(Random().nextInt(3))).map{
+//                BaseTransactionProducer(
+//                        "yura",
+//                        "vasya",
+//                        BaseMessageModel("Hello, my message is ${i}!", Date().time),
+//                        sender,
+//                        object : SignatureProducer {
+//                            override fun produceSignature(content: ByteArray, keyPair: KeyPair): ByteArray {
+//                                return HashUtils.signData(content, keyPair)
+//                            }
+//                        }
+//                ).produce(BaseJSONSerializer())
+//            }
+//
+//
+//            chain.pushBlock(chain.createBlock(transactions, BaseJSONSerializer()))
 //        }
 //        println(BaseJSONSerializer().serialize(chain.produce(BaseJSONSerializer())))
 //    }

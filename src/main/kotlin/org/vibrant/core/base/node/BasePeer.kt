@@ -10,17 +10,23 @@ import org.vibrant.core.node.RemoteNode
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
+import java.net.SocketException
+import java.util.*
 import java.util.concurrent.CountDownLatch
+import kotlin.concurrent.thread
+import kotlin.coroutines.experimental.suspendCoroutine
 
 class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(port) {
 
-    val logger = KotlinLogging.logger {  }
+    protected val logger = KotlinLogging.logger {}
     /**
      * Socket to receive packages
      */
     private val socket = DatagramSocket(this.port)
 
-    private var serverSession: Deferred<Any>? = null
+
+
+    private var serverSession: Thread? = null
 
     internal val sessions = hashMapOf<Long, BaseSession>()
 
@@ -33,27 +39,28 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
 
 
     override fun start() {
-        this.serverSession = async{
+        this.serverSession = thread(true, name = "Request loop on port $port"){
             while(true){
-                val buf = ByteArray(65536)
-                val packet = DatagramPacket(buf, buf.size)
-                logger.info { "Waiting JSON RPC 2.0 request... $port" }
-                socket.receive(packet)
-                this@BasePeer.addUniqueRemoteNode(RemoteNode(packet.address.hostName, packet.port))
-                //idk why coroutine ain't working here.
-                Thread{
-                    runBlocking {
-                        this@BasePeer.handleResponse(buf, packet)
+                try{
+                    val buf = ByteArray(65536)
+                    val packet = DatagramPacket(buf, buf.size)
+                    logger.info { "Waiting JSON RPC 2.0 request... $port" }
+                    socket.receive(packet)
+                    this@BasePeer.addUniqueRemoteNode(RemoteNode(packet.address.hostName, packet.port))
+                    //idk why coroutine ain't working here.
+                    async {
+                        this@BasePeer.handlePackage(buf, packet)
                     }
-                }.start()
-
-                logger.info { "Suspended handler" }
+                    logger.info { "Suspended handler $port" }
+                }catch (e: SocketException){
+                    break
+                }
             }
         }
 
     }
 
-    private suspend fun handleResponse(buf: ByteArray, packet: DatagramPacket){
+    private suspend fun handlePackage(buf: ByteArray, packet: DatagramPacket){
         val entity = BaseJSONSerializer().deserializeJSONRPC(String(buf))
         when (entity) {
             is JSONRPCRequest -> {
@@ -62,11 +69,6 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
                 logger.info { "Responding with $response" }
                 val responseBytes = BaseJSONSerializer().serialize(response).toByteArray()
                 socket.send(DatagramPacket(responseBytes, responseBytes.size, packet.socketAddress))
-                this@BasePeer.node.possibleAheads.forEach {
-                    logger.info { "possible ahead, syncing.." }
-                    this@BasePeer.node.synchronize(it)
-                    logger.info { "possible ahead synced!" }
-                }
                 this@BasePeer.node.possibleAheads.clear()
                 this@BasePeer.onRequestReceivedListeners.forEach { it(entity) }
             }
@@ -76,7 +78,7 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
                 this@BasePeer.onResponseReceivedListeners.forEach { it(entity) }
             }
             else -> {
-
+                logger.info { "Received something really crazy $entity" }
             }
         }
     }
@@ -91,13 +93,13 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
     }
 
 
-    fun broadcast(request: JSONRPCRequest): List<Deferred<JSONRPCResponse<*>>> {
+    suspend fun broadcast(request: JSONRPCRequest): List<JSONRPCResponse<*>> {
         return this.allPeers.map {
             this@BasePeer.send(it, request)
         }
     }
 
-    fun send(remoteNode: RemoteNode, request: JSONRPCRequest): Deferred<JSONRPCResponse<*>> {
+    suspend fun send(remoteNode: RemoteNode, request: JSONRPCRequest): JSONRPCResponse<*> {
         val serialized = BaseJSONSerializer().serialize(request).toByteArray()
         val latch = CountDownLatch(1)
         var deferredResponse: JSONRPCResponse<*>? = null
@@ -109,19 +111,16 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
             }
         }
 
-        return async {
-            socket.send(DatagramPacket(serialized, serialized.size, InetSocketAddress(remoteNode.address, remoteNode.port)))
-            latch.await()
-            deferredResponse!!
-        }
-
+        socket.send(DatagramPacket(serialized, serialized.size, InetSocketAddress(remoteNode.address, remoteNode.port)))
+        latch.await()
+        return deferredResponse!!
     }
 
 
-
     override fun stop() {
-        this.serverSession?.cancel()
         this.socket.close()
+        this.socket.disconnect()
+        this.serverSession?.interrupt()
     }
 
 }

@@ -53,7 +53,7 @@ class TestJSONRPC {
 
         val serialized = BaseJSONSerializer().serialize(request)
         assertEquals(
-                "{\"method\":\"callWithNoParams\",\"params\":[],\"id\":\"1\",\"version\":\"2.0\"}",
+                "{\"method\":\"callWithNoParams\",\"params\":[],\"id\":1,\"version\":\"2.0\"}",
                 serialized
         )
     }

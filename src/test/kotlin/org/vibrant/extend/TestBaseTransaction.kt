@@ -105,9 +105,6 @@ class TestBaseTransaction {
                 }
         ).produce(BaseJSONSerializer())
 
-        val expectedSignature = HashUtils.bytesToHex(
-                HashUtils.signData((transaction.from + transaction.to + transaction.payload).toByteArray(), sender)
-        )
         val serialized = BaseJSONSerializer().serialize(transaction)
         assertEquals(
                 "{\"@type\":\"transaction\",\"from\":\"yura\",\"to\":\"vasya\",\"payload\":{\"@type\":\"message\",\"content\":\"Hello!\",\"timestamp\":0},\"signature\":\"${transaction.signature}\"}",

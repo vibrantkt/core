@@ -4,6 +4,7 @@ import kotlinx.coroutines.experimental.async
 import org.vibrant.core.base.BaseJSONSerializer
 import org.vibrant.core.base.jsonrpc.JSONRPCRequest
 import org.vibrant.core.base.jsonrpc.JSONRPCResponse
+import org.vibrant.core.base.models.BaseBlockModel
 import org.vibrant.core.base.models.BaseTransactionModel
 import org.vibrant.core.node.RemoteNode
 
@@ -14,7 +15,7 @@ open class BaseJSONRPCProtocol(val node: BaseNode) {
     fun addTransaction(request: JSONRPCRequest, remoteNode: RemoteNode): JSONRPCResponse<*>{
         val transaction = BaseJSONSerializer().deserialize(request.params[0].toString()) as BaseTransactionModel
         if(node is BaseMiner){
-
+            node.addTransaction(transaction)
         }
         return JSONRPCResponse(
                 result = node is BaseMiner,
@@ -35,8 +36,21 @@ open class BaseJSONRPCProtocol(val node: BaseNode) {
 
 
     @JSONRPCMethod
+    fun newBlock(request: JSONRPCRequest, remoteNode: RemoteNode): JSONRPCResponse<*>{
+        val blockModel = BaseJSONSerializer().deserialize(request.params[0] as String) as BaseBlockModel
+        node.handleLastBlock(blockModel, remoteNode)
+        return JSONRPCResponse(
+                result = BaseJSONSerializer().serialize(node.chain.latestBlock()),
+                error = null,
+                id = request.id
+        )
+    }
+
+
+    @JSONRPCMethod
     fun syncWithMe(request: JSONRPCRequest, remoteNode: RemoteNode): JSONRPCResponse<*>{
-        node.possibleAheads.add(remoteNode)
+//        node.possibleAheads.add(remoteNode)
+        node.synchronize(remoteNode)
         return JSONRPCResponse(
                 result = true,
                 error = null,
