@@ -10,9 +10,7 @@ import org.vibrant.core.node.RemoteNode
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
-import kotlin.coroutines.experimental.suspendCoroutine
 
 class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(port) {
 
@@ -27,12 +25,15 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
     internal val sessions = hashMapOf<Long, BaseSession>()
 
 
-    internal val peers = arrayListOf<RemoteNode>()
+    internal val allPeers = arrayListOf<RemoteNode>()
+    internal val miners = arrayListOf<RemoteNode>()
+
+    internal val onRequestReceivedListeners = arrayListOf<(JSONRPCRequest) -> Unit>()
+    internal val onResponseReceivedListeners = arrayListOf<(JSONRPCResponse<*>) -> Unit>()
 
 
     override fun start() {
-//        this.serverSession =
-        runBlocking{
+        this.serverSession = async{
             while(true){
                 val buf = ByteArray(65536)
                 val packet = DatagramPacket(buf, buf.size)
@@ -67,10 +68,12 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
                     logger.info { "possible ahead synced!" }
                 }
                 this@BasePeer.node.possibleAheads.clear()
+                this@BasePeer.onRequestReceivedListeners.forEach { it(entity) }
             }
             is JSONRPCResponse<*> -> {
                 logger.info { "Received response $entity, handling..." }
                 this@BasePeer.sessions[entity.id]?.handle(entity)
+                this@BasePeer.onResponseReceivedListeners.forEach { it(entity) }
             }
             else -> {
 
@@ -78,15 +81,18 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
         }
     }
 
-    internal fun addUniqueRemoteNode(remoteNode: RemoteNode) {
-        if (this.peers.find { it.address == remoteNode.address && it.port == remoteNode.port } == null) {
-            this.peers.add(remoteNode)
+    internal fun addUniqueRemoteNode(remoteNode: RemoteNode, miner: Boolean = false) {
+        if (this.allPeers.find { it.address == remoteNode.address && it.port == remoteNode.port } == null) {
+            this.allPeers.add(remoteNode)
+        }
+        if (miner && this.miners.find { it.address == remoteNode.address && it.port == remoteNode.port } == null) {
+            this.miners.add(remoteNode)
         }
     }
 
 
     fun broadcast(request: JSONRPCRequest): List<Deferred<JSONRPCResponse<*>>> {
-        return this.peers.map {
+        return this.allPeers.map {
             this@BasePeer.send(it, request)
         }
     }
@@ -98,6 +104,7 @@ class BasePeer(port: Int, private val node: BaseNode): AbstractPeer<RemoteNode>(
         this@BasePeer.sessions[request.id] = object : BaseSession(remoteNode, request){
             override fun handle(response: JSONRPCResponse<*>) {
                 deferredResponse = response
+                this@BasePeer.sessions.remove(request.id)
                 latch.countDown()
             }
         }

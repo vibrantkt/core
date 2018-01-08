@@ -79,9 +79,10 @@ open class BaseNode(private val port: Int) : AbstractNode<BaseBlockChainModel, B
 
     override fun connect(remoteNode: RemoteNode): Boolean {
         return runBlocking {
-            val response = this@BaseNode.peer.send(remoteNode, JSONRPCRequest("echo", arrayOf("peer"), this@BaseNode.requestID++)).await()
-            return@runBlocking if(response.result == "peer"){
-                this@BaseNode.peer.addUniqueRemoteNode(remoteNode)
+            val response1 = this@BaseNode.peer.send(remoteNode, JSONRPCRequest("echo", arrayOf("peer"), this@BaseNode.requestID++)).await()
+            val response2 = this@BaseNode.peer.send(remoteNode, JSONRPCRequest("nodeType", arrayOf(), this@BaseNode.requestID++)).await()
+            return@runBlocking if(response1.result == "peer"){
+                this@BaseNode.peer.addUniqueRemoteNode(remoteNode, response2.result.toString() == "miner")
                 true
             }else{
                 false

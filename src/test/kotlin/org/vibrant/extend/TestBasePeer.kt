@@ -1,38 +1,35 @@
 package org.vibrant.extend
 
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.vibrant.core.base.BaseJSONSerializer
-import org.vibrant.core.base.models.BaseBlockChainModel
+import org.vibrant.core.base.jsonrpc.JSONRPCRequest
 import org.vibrant.core.base.models.BaseMessageModel
-import org.vibrant.core.base.models.BaseTransactionModel
-import org.vibrant.core.base.node.BaseJSONRPCProtocol
 import org.vibrant.core.base.node.BaseMiner
 import org.vibrant.core.base.node.BaseNode
-import org.vibrant.core.base.node.BasePeer
-import org.vibrant.core.base.producers.BaseBlockChainProducer
 import org.vibrant.core.base.producers.BaseTransactionProducer
 import org.vibrant.core.node.RemoteNode
 import org.vibrant.core.reducers.SignatureProducer
 import org.vibrant.core.util.AccountUtils
 import org.vibrant.core.util.HashUtils
 import java.security.KeyPair
-import java.util.*
+import kotlin.coroutines.experimental.suspendCoroutine
 
 class TestBasePeer {
 
 
     @Test
     fun `Test peer echo`(){
-        val node1 = BaseNode(7000)
-        val node2 = BaseNode(7001)
+        val node = BaseNode(7000)
+        val miner = BaseMiner(7001)
 
 
-        node1.start()
-        node2.start()
+        node.start()
+        miner.start()
 
-        val some = node1.connect(RemoteNode("localhost", 7001))
+        val some = node.connect(RemoteNode("localhost", 7001))
         // check ping - pong
         assertEquals(
                 true,
@@ -42,15 +39,53 @@ class TestBasePeer {
         // connection established
 
         assertEquals(
-                node1.peer.peers.size,
+                node.peer.allPeers.size,
                 1
         )
 
         assertEquals(
-                node2.peer.peers.size,
+                node.peer.miners.size,
                 1
         )
 
+        assertEquals(
+                miner.peer.allPeers.size,
+                1
+        )
+
+        assertEquals(
+                miner.peer.miners.size,
+                0
+        )
+
+
+        node.stop()
+        miner.stop()
+    }
+
+
+    @Test
+    fun `Test peer return type`(){
+        val node1 = BaseNode(7000)
+        val node2 = BaseMiner(7001)
+
+
+        node1.start()
+        node2.start()
+
+
+        val expectedNode = node1.rpc.nodeType(JSONRPCRequest("a", arrayOf(),1L), RemoteNode("", 0))
+        val expectedMiner = node2.rpc.nodeType(JSONRPCRequest("a", arrayOf(),1L), RemoteNode("", 0))
+
+        assertEquals(
+                expectedNode.result.toString(),
+                "node"
+        )
+
+        assertEquals(
+                expectedMiner.result.toString(),
+                "miner"
+        )
 
         node1.stop()
         node2.stop()
@@ -108,13 +143,21 @@ class TestBasePeer {
         ))
 
 
+
+
         miner.connect(RemoteNode("localhost", 7000))
         println("Connected")
         miner.synchronize(RemoteNode("localhost", 7000))
         println("Synced")
 
+        runBlocking {
+            suspendCoroutine<Unit> { s ->
+                node.chain.onChange.add { _ ->
+                    s.resume(Unit)
+                }
+            }
+        }
 
-        Thread.sleep(1000)
         assertEquals(
                 miner.chain.produce(BaseJSONSerializer()),
                 node.chain.produce(BaseJSONSerializer())

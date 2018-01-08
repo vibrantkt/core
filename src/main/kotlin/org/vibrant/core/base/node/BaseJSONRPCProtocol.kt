@@ -55,6 +55,21 @@ open class BaseJSONRPCProtocol(val node: BaseNode) {
     }
 
 
+    @Suppress("USELESS_IS_CHECK")
+    @JSONRPCMethod
+    fun nodeType(request: JSONRPCRequest, remoteNode: RemoteNode): JSONRPCResponse<*> {
+        return JSONRPCResponse(
+                result = when(node){
+                    is BaseMiner -> "miner"
+                    is BaseNode -> "node"
+                    else -> "node"
+                },
+                error = null,
+                id = request.id
+        )
+    }
+
+
     @JSONRPCMethod
     fun echo(request: JSONRPCRequest, remoteNode: RemoteNode): JSONRPCResponse<*> {
         return JSONRPCResponse(

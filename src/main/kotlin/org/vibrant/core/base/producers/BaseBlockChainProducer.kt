@@ -1,11 +1,8 @@
 package org.vibrant.core.base.producers
 
-import org.vibrant.core.ModelProducer
 import org.vibrant.core.base.models.BaseBlockChainModel
 import org.vibrant.core.base.models.BaseBlockModel
 import org.vibrant.core.base.models.BaseTransactionModel
-import org.vibrant.core.models.BlockModel
-import org.vibrant.core.models.TransactionModel
 import org.vibrant.core.producers.BlockChainProducer
 import org.vibrant.core.reducers.ModelSerializer
 import java.util.*
@@ -16,7 +13,7 @@ class BaseBlockChainProducer(val difficulty: Int = 1) : BlockChainProducer<BaseB
             this.createGenesisBlock()
     )
 
-
+    internal val onChange = arrayListOf<(BlockChainProducer<BaseBlockChainModel>) -> Unit>()
 
     override fun produce(serializer: ModelSerializer): BaseBlockChainModel {
         return BaseBlockChainModel(
@@ -43,6 +40,7 @@ class BaseBlockChainProducer(val difficulty: Int = 1) : BlockChainProducer<BaseB
 
     fun pushBlock(block: BaseBlockModel): BaseBlockModel {
         this.blocks.add(block)
+        this.handleChange()
         return this.latestBlock()
     }
 
@@ -74,6 +72,12 @@ class BaseBlockChainProducer(val difficulty: Int = 1) : BlockChainProducer<BaseB
     fun dump(blockChainModel: BaseBlockChainModel){
         this.blocks.clear()
         this.blocks.addAll(blockChainModel.blocks)
+        this.handleChange()
+    }
+
+
+    private fun handleChange(){
+        this.onChange.forEach { it(this@BaseBlockChainProducer) }
     }
 
     companion object {
