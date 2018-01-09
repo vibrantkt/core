@@ -9,7 +9,7 @@ import java.net.InetSocketAddress
 import java.net.SocketException
 import java.util.concurrent.CountDownLatch
 
-abstract class UDPSessionPeer<B, Package: UDPSessionPeer.Communication.CommunicationPackage<B>>
+abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.CommunicationPackage>
 (port: Int, private val deserializer: UDPSessionPeer.Communication.CommunicationPackageDeserializer<Package>): AbstractPeer<RemoteNode>(port) {
 
     protected val logger = KotlinLogging.logger {}
@@ -19,7 +19,7 @@ abstract class UDPSessionPeer<B, Package: UDPSessionPeer.Communication.Communica
     private val socket = DatagramSocket(this.port)
 
 
-    val sessions = hashMapOf<Long, Session<B, Package>>()
+    val sessions = hashMapOf<Long, Session<Package>>()
     private var serverSession: Deferred<Unit>? = null
 
     val peers = arrayListOf<RemoteNode>()
@@ -48,7 +48,7 @@ abstract class UDPSessionPeer<B, Package: UDPSessionPeer.Communication.Communica
 
     }
 
-    abstract suspend fun handlePackage(pckg: Package, peer: UDPSessionPeer<B, Package>, remoteNode: RemoteNode)
+    abstract suspend fun handlePackage(pckg: Package, peer: UDPSessionPeer<Package>, remoteNode: RemoteNode)
 
     private fun addUniqueRemoteNode(remoteNode: RemoteNode, miner: Boolean = false) {
         if (this.peers.find { it.address == remoteNode.address && it.port == remoteNode.port } == null) {
@@ -64,7 +64,7 @@ abstract class UDPSessionPeer<B, Package: UDPSessionPeer.Communication.Communica
         socket.send(DatagramPacket(byteData, byteData.size, InetSocketAddress(remoteNode.address, remoteNode.port)))
         val latch = CountDownLatch(1)
         var awaitingResponse: Package? = null
-        this.sessions[data.id] = object: Session<B, Package>(remoteNode, data){
+        this.sessions[data.id] = object: Session<Package>(remoteNode, data){
             override fun handle(response: Package) {
                 latch.countDown()
                 awaitingResponse = response
@@ -101,11 +101,11 @@ abstract class UDPSessionPeer<B, Package: UDPSessionPeer.Communication.Communica
 
 
     class Communication{
-        abstract class CommunicationPackage<out T>(open val id: Long, open val payload: T){
+        abstract class CommunicationPackage(open val id: Long){
             abstract fun toByteArray(): ByteArray
         }
 
-        abstract class CommunicationPackageDeserializer<out Package: CommunicationPackage<*>>{
+        abstract class CommunicationPackageDeserializer<out Package: CommunicationPackage>{
             abstract fun fromByteArray(byteArray: ByteArray): Package
         }
     }

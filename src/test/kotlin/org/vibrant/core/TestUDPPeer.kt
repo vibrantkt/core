@@ -9,7 +9,7 @@ import java.net.SocketException
 
 class TestUDPPeer {
 
-    data class ExamplePackage(override val id: Long, override val payload: String): UDPSessionPeer.Communication.CommunicationPackage<String>(id, payload) {
+    data class ExamplePackage(override val id: Long, val payload: String): UDPSessionPeer.Communication.CommunicationPackage(id) {
         override fun toByteArray(): ByteArray {
             return "$id\n$payload".toByteArray(charset("UTF-8"))
         }
@@ -29,8 +29,8 @@ class TestUDPPeer {
 
     }
 
-    class SimpleImplementation(port: Int): UDPSessionPeer<String, ExamplePackage>(port, Deserializer()){
-        suspend override fun handlePackage(pckg: ExamplePackage, peer: UDPSessionPeer<String, ExamplePackage>, remoteNode: RemoteNode) {
+    class SimpleImplementation(port: Int): UDPSessionPeer<ExamplePackage>(port, Deserializer()){
+        suspend override fun handlePackage(pckg: ExamplePackage, peer: UDPSessionPeer<ExamplePackage>, remoteNode: RemoteNode) {
             if(peer.sessions.containsKey(pckg.id)){
                 this.sessions[pckg.id]?.handle(pckg)
                 this.sessions.remove(pckg.id)
