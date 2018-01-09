@@ -2,12 +2,11 @@ package org.vibrant.core
 
 import org.junit.Test
 
-class TestNode {
+class TestVibrant {
 
 
     @Test
-    fun `Test node connection`(){
-//        val
+    fun `Combine`(){
+        
     }
-
 }
