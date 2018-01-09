@@ -9,6 +9,7 @@ import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import java.net.SocketException
 import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.experimental.suspendCoroutine
 
 abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.CommunicationPackage>
 (port: Int, private val deserializer: UDPSessionPeer.Communication.CommunicationPackageDeserializer<Package>): AbstractPeer<RemoteNode>(port) {
@@ -63,16 +64,13 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
     open suspend fun request(remoteNode: RemoteNode, data: Package): Package {
         val byteData = data.toByteArray()
         socket.send(DatagramPacket(byteData, byteData.size, InetSocketAddress(remoteNode.address, remoteNode.port)))
-        val latch = CountDownLatch(1)
-        var awaitingResponse: Package? = null
-        this.sessions[data.id] = object: Session<Package>(remoteNode, data){
-            override fun handle(response: Package) {
-                latch.countDown()
-                awaitingResponse = response
+        return suspendCoroutine {
+            this.sessions[data.id] = object: Session<Package>(remoteNode, data){
+                override fun handle(response: Package) {
+                    it.resume(response)
+                }
             }
         }
-        latch.await()
-        return awaitingResponse!!
     }
 
     open suspend fun send(remoteNode: RemoteNode, data: Package) {
