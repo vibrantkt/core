@@ -3,6 +3,7 @@ package org.vibrant.core.node
 
 import kotlinx.coroutines.experimental.*
 import mu.KotlinLogging
+import org.vibrant.core.models.Model
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
@@ -101,7 +102,7 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
 
 
     class Communication{
-        abstract class CommunicationPackage(open val id: Long){
+        abstract class CommunicationPackage(open val id: Long): Model(){
             abstract fun toByteArray(): ByteArray
         }
 
