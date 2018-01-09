@@ -51,7 +51,7 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
 
     abstract suspend fun handlePackage(pckg: Package, peer: UDPSessionPeer<Package>, remoteNode: RemoteNode)
 
-    protected fun addUniqueRemoteNode(remoteNode: RemoteNode, miner: Boolean = false) {
+    fun addUniqueRemoteNode(remoteNode: RemoteNode, miner: Boolean = false) {
         if (this.peers.find { it.address == remoteNode.address && it.port == remoteNode.port } == null) {
             this.peers.add(remoteNode)
         }
