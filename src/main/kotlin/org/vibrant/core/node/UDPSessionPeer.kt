@@ -36,11 +36,12 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
                     val packet = DatagramPacket(buf, buf.size)
                     logger.info { "Waiting packet..." }
                     socket.receive(packet)
-                    logger.info { "Received packet..." }
+                    logger.info { "Received packet... " }
                     this@UDPSessionPeer.addUniqueRemoteNode(RemoteNode(packet.address.hostName, packet.port))
                     async {
-                        logger.info { "Hey there ints HANDLER" }
-                        this@UDPSessionPeer.handlePackage(deserializer.fromByteArray(packet.data), this@UDPSessionPeer, RemoteNode(packet.address.hostName, packet.port))
+                        val data = deserializer.fromByteArray(packet.data)
+                        logger.info { "Received $data" }
+                        this@UDPSessionPeer.handlePackage(data, this@UDPSessionPeer, RemoteNode(packet.address.hostName, packet.port))
                     }
                 }catch (e: SocketException){
                     break
@@ -61,16 +62,14 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
         }
     }
 
-    open suspend fun request(remoteNode: RemoteNode, data: Package): Package {
-        val byteData = data.toByteArray()
-        socket.send(DatagramPacket(byteData, byteData.size, InetSocketAddress(remoteNode.address, remoteNode.port)))
-        return suspendCoroutine {
-            this.sessions[data.id] = object: Session<Package>(remoteNode, data){
-                override fun handle(response: Package) {
-                    it.resume(response)
-                }
+    open suspend fun request(remoteNode: RemoteNode, data: Package): Package  = suspendCoroutine{
+        this.sessions[data.id] = object: Session<Package>(remoteNode, data){
+            override fun handle(response: Package) {
+                it.resume(response)
             }
         }
+        val byteData = data.toByteArray()
+        socket.send(DatagramPacket(byteData, byteData.size, InetSocketAddress(remoteNode.address, remoteNode.port)))
     }
 
     open suspend fun send(remoteNode: RemoteNode, data: Package) {
