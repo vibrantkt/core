@@ -14,8 +14,10 @@ group 'org.vibrant'
 version '0.1'
 
 apply plugin: 'kotlin'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
 
+
+group = 'com.github.vibrantkt'
 
 repositories {
     mavenCentral()
