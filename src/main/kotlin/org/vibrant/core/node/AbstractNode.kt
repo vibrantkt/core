@@ -29,6 +29,6 @@ abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>
     /**
      * Connect to peer
      */
-    abstract fun connect(remoteNode: RemoteNode): Boolean
+    abstract suspend fun connect(remoteNode: RemoteNode): Boolean
 
 }
