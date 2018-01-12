@@ -23,7 +23,7 @@ class Vibrant{
         this.node!!.start()
     }
 
-    internal fun handleData(byteArray: ByteArray, from: RemoteNode){
-        this.node?.handle(serializer!!.deserialize(byteArray), from)
+    internal fun handleData(byteArray: ByteArray, from: RemoteNode): ByteArray{
+        return this.node!!.handle(serializer!!.deserialize(byteArray), from)
     }
 }

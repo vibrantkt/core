@@ -31,5 +31,5 @@ abstract class AbstractNode(val vibrant: Vibrant) {
     /**
      *
      */
-    abstract fun handle(data: Model, from: RemoteNode)
+    abstract fun handle(data: Model, from: RemoteNode): ByteArray
 }
