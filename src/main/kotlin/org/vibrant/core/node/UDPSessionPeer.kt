@@ -8,6 +8,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import java.net.SocketException
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import kotlin.coroutines.experimental.suspendCoroutine
 
@@ -38,7 +39,7 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
                     socket.receive(packet)
                     logger.info { "Received packet... " }
                     this@UDPSessionPeer.addUniqueRemoteNode(RemoteNode(packet.address.hostName, packet.port))
-                    async {
+                    async(newSingleThreadContext("Handling blocking response... ${Date().time + Random().nextInt()}")) {
                         logger.info { "Deserializing received data..." }
                         val data = deserializer.fromByteArray(packet.data)
                         logger.info { "Received $data" }
