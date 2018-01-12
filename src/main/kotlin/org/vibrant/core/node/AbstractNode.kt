@@ -1,18 +1,14 @@
 package org.vibrant.core.node
 
-import org.vibrant.core.models.BlockChainModel
-import org.vibrant.core.models.BlockModel
-import org.vibrant.core.producers.BlockChainProducer
+import org.vibrant.core.ModelSerializer
+import org.vibrant.core.Vibrant
+import org.vibrant.core.models.Model
 
 /***
  * Abstract network node
  *
- * @property chain blockchain
  */
-abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>> {
-
-    internal abstract val chain: B
-
+abstract class AbstractNode(val vibrant: Vibrant) {
 
     /***
      * Start peer, after this node should be able to handle connections
@@ -31,4 +27,9 @@ abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>
      */
     abstract fun connect(remoteNode: RemoteNode): Boolean
 
+
+    /**
+     *
+     */
+    abstract fun handle(data: Model, from: RemoteNode)
 }

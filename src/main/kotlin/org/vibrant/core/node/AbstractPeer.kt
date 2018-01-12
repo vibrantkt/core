@@ -1,6 +1,8 @@
 package org.vibrant.core.node
 
-abstract class AbstractPeer<in T: RemoteNode>(val port: Int){
+import org.vibrant.core.Vibrant
+
+abstract class AbstractPeer(val vibrant: Vibrant, val port: Int){
 
     /**
      * Stop peer
@@ -11,5 +13,10 @@ abstract class AbstractPeer<in T: RemoteNode>(val port: Int){
      * Start peer
      */
     abstract fun start()
+
+
+    private fun handleData(byteArray: ByteArray, from: RemoteNode){
+        this.vibrant.handleData(byteArray, from)
+    }
 
 }
