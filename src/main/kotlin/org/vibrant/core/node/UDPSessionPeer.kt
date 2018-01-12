@@ -39,6 +39,7 @@ abstract class UDPSessionPeer<Package: UDPSessionPeer.Communication.Communicatio
                     logger.info { "Received packet... " }
                     this@UDPSessionPeer.addUniqueRemoteNode(RemoteNode(packet.address.hostName, packet.port))
                     async {
+                        logger.info { "Deserializing received data..." }
                         val data = deserializer.fromByteArray(packet.data)
                         logger.info { "Received $data" }
                         this@UDPSessionPeer.handlePackage(data, this@UDPSessionPeer, RemoteNode(packet.address.hostName, packet.port))
