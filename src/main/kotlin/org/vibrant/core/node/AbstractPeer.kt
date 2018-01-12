@@ -4,6 +4,10 @@ import org.vibrant.core.Vibrant
 
 abstract class AbstractPeer(val vibrant: Vibrant, val port: Int){
 
+
+    val peers: ArrayList<RemoteNode> = arrayListOf()
+
+
     /**
      * Stop peer
      */
@@ -22,5 +26,12 @@ abstract class AbstractPeer(val vibrant: Vibrant, val port: Int){
 
 
     abstract fun request(byteArray: ByteArray, from: RemoteNode): ByteArray
+
+
+    open fun addUniqueRemoteNode(remoteNode: RemoteNode, miner: Boolean = false) {
+        if (this.peers.find { it.address == remoteNode.address && it.port == remoteNode.port } == null) {
+            this.peers.add(remoteNode)
+        }
+    }
 
 }
