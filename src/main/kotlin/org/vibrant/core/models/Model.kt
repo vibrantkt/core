@@ -6,9 +6,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 
 /***
  * Base model class
- * @property _type _type, needed for serialization and deserialization
  */
 
-abstract class Model{
-//    abstract protected val _type: String
-}
+abstract class Model

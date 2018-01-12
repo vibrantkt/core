@@ -9,7 +9,7 @@ import org.vibrant.core.producers.BlockChainProducer
  *
  * @property chain blockchain
  */
-abstract class AbstractNode<T: BlockChainModel, out B: BlockChainProducer<T>> {
+abstract class AbstractNode<out T: BlockChainModel, out B: BlockChainProducer<T>> {
 
     internal abstract val chain: B
 
