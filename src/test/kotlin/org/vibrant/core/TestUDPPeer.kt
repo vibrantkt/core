@@ -30,7 +30,7 @@ class TestUDPPeer {
     }
 
     class SimpleImplementation(port: Int): UDPSessionPeer<ExamplePackage>(port, Deserializer()){
-        suspend override fun handlePackage(pckg: ExamplePackage, peer: UDPSessionPeer<ExamplePackage>, remoteNode: RemoteNode) {
+        override suspend fun handlePackage(pckg: ExamplePackage, peer: UDPSessionPeer<ExamplePackage>, remoteNode: RemoteNode) {
             if(peer.sessions.containsKey(pckg.id)){
                 this.sessions[pckg.id]?.handle(pckg)
                 this.sessions.remove(pckg.id)
@@ -49,8 +49,6 @@ class TestUDPPeer {
 
         node1.start()
         node2.start()
-
-
 
 
         runBlocking {

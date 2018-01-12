@@ -1,4 +1,4 @@
-package org.vibrant.core.reducers
+package org.vibrant.core.algorithm
 
 import java.security.KeyPair
 

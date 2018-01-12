@@ -1,4 +1,4 @@
-package org.vibrant.core.reducers
+package org.vibrant.core.algorithm
 
 interface HashProducer {
     fun produceHash(data: ByteArray): ByteArray
