@@ -15,8 +15,8 @@ abstract class AbstractPeer(val vibrant: Vibrant, val port: Int){
     abstract fun start()
 
 
-    protected fun handleData(byteArray: ByteArray, from: RemoteNode){
-        this.vibrant.handleData(byteArray, from)
+    protected fun handleData(byteArray: ByteArray, from: RemoteNode): ByteArray {
+        return this.vibrant.handleData(byteArray, from)
     }
 
 }
