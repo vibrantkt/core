@@ -43,4 +43,8 @@ abstract class AbstractNode(val vibrant: Vibrant) {
                 this.vibrant.peer!!.request(vibrant.serializer!!.serialize(data), from)
         )
     }
+
+    fun broadcast(data: Model): List<Model>{
+        return vibrant.peer!!.broadcast(vibrant.serializer!!.serialize(data)).map { vibrant.serializer!!.deserialize(it) }
+    }
 }

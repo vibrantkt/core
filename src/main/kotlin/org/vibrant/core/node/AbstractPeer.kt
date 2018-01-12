@@ -34,4 +34,11 @@ abstract class AbstractPeer(val vibrant: Vibrant, val port: Int){
         }
     }
 
+
+    fun broadcast(byteArray: ByteArray): List<ByteArray> {
+        return this.peers.map{
+            this.request(byteArray, it)
+        }
+    }
+
 }
