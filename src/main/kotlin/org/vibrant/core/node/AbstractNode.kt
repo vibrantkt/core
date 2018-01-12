@@ -32,4 +32,15 @@ abstract class AbstractNode(val vibrant: Vibrant) {
      *
      */
     abstract fun handle(data: Model, from: RemoteNode): ByteArray
+
+
+    /**
+     *
+     */
+
+    fun request(data: Model, from: RemoteNode): Model{
+        return vibrant.serializer!!.deserialize(
+                this.vibrant.peer!!.request(vibrant.serializer!!.serialize(data), from)
+        )
+    }
 }
