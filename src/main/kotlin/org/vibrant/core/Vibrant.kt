@@ -3,30 +3,25 @@ package org.vibrant.core
 import org.vibrant.core.node.AbstractNode
 import org.vibrant.core.node.AbstractPeer
 import org.vibrant.core.node.RemoteNode
-import org.vibrant.core.producers.BlockChainProducer
 
-class Vibrant{
+open class Vibrant<N: AbstractNode, P: AbstractPeer, S: ModelSerializer>(
+        val node: N,
+        val peer: P,
+        val serializer: S
+){
 
-    var node: AbstractNode? = null
-    var peer: AbstractPeer? = null
-    var serializer: ModelSerializer? = null
-    var blockchain: BlockChainProducer<*>? = null
-
-
-    private fun check(){
-        assert(node != null)
-        assert(peer != null)
-        assert(serializer != null)
-        assert(blockchain != null)
+    open fun start(){
+        this.peer.start()
+        this.node.start()
     }
 
-    fun start(){
-        this.check()
-        this.peer!!.start()
-        this.node!!.start()
+
+    open fun stop(){
+        this.peer.stop()
+        this.node.stop()
     }
 
     internal fun handleData(byteArray: ByteArray, from: RemoteNode): ByteArray{
-        return this.node!!.handle(serializer!!.deserialize(byteArray), from)
+        return this.node.handle(serializer.deserialize(byteArray), from)
     }
 }

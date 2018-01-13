@@ -2,7 +2,7 @@ package org.vibrant.core.node
 
 import org.vibrant.core.Vibrant
 
-abstract class AbstractPeer(val vibrant: Vibrant, val port: Int){
+abstract class AbstractPeer(val vibrant: Vibrant<*, *, *>, val port: Int){
 
 
     val peers: ArrayList<RemoteNode> = arrayListOf()

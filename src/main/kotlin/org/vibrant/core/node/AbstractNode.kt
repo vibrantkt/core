@@ -8,7 +8,7 @@ import org.vibrant.core.models.Model
  * Abstract network node
  *
  */
-abstract class AbstractNode(val vibrant: Vibrant) {
+abstract class AbstractNode(val vibrant: Vibrant<*, *, *>) {
 
     /***
      * Start peer, after this node should be able to handle connections
@@ -39,12 +39,12 @@ abstract class AbstractNode(val vibrant: Vibrant) {
      */
 
     fun request(data: Model, from: RemoteNode): Model{
-        return vibrant.serializer!!.deserialize(
-                this.vibrant.peer!!.request(vibrant.serializer!!.serialize(data), from)
+        return vibrant.serializer.deserialize(
+                this.vibrant.peer.request(vibrant.serializer.serialize(data), from)
         )
     }
 
     fun broadcast(data: Model): List<Model>{
-        return vibrant.peer!!.broadcast(vibrant.serializer!!.serialize(data)).map { vibrant.serializer!!.deserialize(it) }
+        return vibrant.peer.broadcast(vibrant.serializer.serialize(data)).map { vibrant.serializer.deserialize(it) }
     }
 }
