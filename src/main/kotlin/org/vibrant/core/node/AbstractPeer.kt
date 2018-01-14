@@ -1,6 +1,6 @@
 package org.vibrant.core.node
 
-abstract class AbstractPeer<in T: RemoteNode>(val port: Int){
+abstract class AbstractPeer{
 
     /**
      * Stop peer
