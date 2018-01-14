@@ -2,13 +2,14 @@ package org.vibrant.core.node
 
 import org.vibrant.core.models.BlockChainModel
 import org.vibrant.core.models.BlockModel
+import org.vibrant.core.models.Model
 import org.vibrant.core.producers.BlockChainProducer
 
 /***
  * Abstract network node
  *
  */
-abstract class AbstractNode {
+abstract class AbstractNode<T: Model> {
 
 
     /***
@@ -27,5 +28,10 @@ abstract class AbstractNode {
      * Connect to peer
      */
     abstract fun connect(remoteNode: RemoteNode): Boolean
+
+
+
+    abstract fun request(payload: T, remoteNode: RemoteNode): T
+
 
 }

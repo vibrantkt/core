@@ -12,4 +12,6 @@ abstract class AbstractPeer{
      */
     abstract fun start()
 
+
+    abstract fun request(byteArray: ByteArray, remoteNode: RemoteNode): ByteArray
 }

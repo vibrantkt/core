@@ -11,3 +11,7 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script: ./gradlew test
+
+
+notifications:
+  email: false
