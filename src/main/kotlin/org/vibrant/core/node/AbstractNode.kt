@@ -1,9 +1,6 @@
 package org.vibrant.core.node
 
-import org.vibrant.core.models.BlockChainModel
-import org.vibrant.core.models.BlockModel
 import org.vibrant.core.models.Model
-import org.vibrant.core.producers.BlockChainProducer
 
 /***
  * Abstract network node
