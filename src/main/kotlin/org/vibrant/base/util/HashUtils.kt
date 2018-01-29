@@ -7,18 +7,6 @@ object HashUtils {
 
     private val HEX_CHARS = "0123456789ABCDEF".toCharArray()
 
-    private fun hashBytes(type: String, input: ByteArray): ByteArray {
-        return MessageDigest
-                .getInstance(type)
-                .digest(input)
-    }
-
-    fun sha512(input: ByteArray) = hashBytes("SHA-512", input)
-
-    fun sha256(input: ByteArray) = hashBytes("SHA-256", input)
-
-    fun sha1(input: ByteArray) = hashBytes("SHA-1", input)
-
 
     fun bytesToHex(bytes: ByteArray): String {
         val result = StringBuffer()
