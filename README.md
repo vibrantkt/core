@@ -5,6 +5,22 @@
 
 ![Logo](https://image.ibb.co/fSKk9R/vibrant2.png)
 
-Hey there. Vibrant is a library to build distributed platforms or applications. It's good for distributed solutions and very customizable. Vibrant allows to modify almost everything - from hashing and signing algorithms to serialization and blockchain structure.
+Hey there. Vibrant is a library for prototyping or building distributed apps. Core idea is to provide boilerplate code e.g. peer connection or blockchain synchronization, so developer may focus on logic. 
 
-Project is in early development stage; global design and concept may change often
+
+## Gradle 
+1) Add jitpack repo 
+```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+2) Add latest vibrant to dependencies(latest version is in jitpack badge at the top of this page)
+```
+dependencies {
+    compile 'com.github.vibrantkt:core:%latest-version-in-badge%'
+}
+```
