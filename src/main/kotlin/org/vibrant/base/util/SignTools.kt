@@ -5,10 +5,11 @@ import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.security.KeyPair
+import java.security.KeyPairGenerator
 import java.security.PublicKey
 import java.security.Signature
 
-object SignData {
+object SignTools {
 
     fun signDataWith(data: ByteArray, algorithm: String, keyPair: KeyPair): ByteArray {
         val sig = Signature.getInstance(algorithm)
@@ -42,5 +43,13 @@ object SignData {
         val bi = ByteArrayInputStream(byteArray)
         val oi = ObjectInputStream(bi)
         return oi.readObject() as KeyPair
+    }
+
+
+
+    fun generateKeyPair(): KeyPair {
+        val kpg = KeyPairGenerator.getInstance("RSA")
+        kpg.initialize(1024)
+        return kpg.genKeyPair()
     }
 }
