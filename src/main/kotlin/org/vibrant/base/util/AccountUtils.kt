@@ -1,4 +1,4 @@
-package org.vibrant.example.chat.base.util
+package org.vibrant.base.util
 
 import java.security.*
 import java.security.KeyPair
@@ -7,9 +7,6 @@ import java.io.ByteArrayOutputStream
 import java.security.KeyPairGenerator
 import java.io.ObjectInputStream
 import java.io.ByteArrayInputStream
-
-
-
 
 
 

@@ -1,4 +1,4 @@
-package org.vibrant.example.chat.base.util
+package org.vibrant.base.util
 
 import java.security.KeyPair
 import java.security.MessageDigest
