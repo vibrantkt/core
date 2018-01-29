@@ -47,8 +47,8 @@ object SignTools {
 
 
 
-    fun generateKeyPair(): KeyPair {
-        val kpg = KeyPairGenerator.getInstance("RSA")
+    fun generateKeyPair(algorithm: String): KeyPair {
+        val kpg = KeyPairGenerator.getInstance(algorithm)
         kpg.initialize(1024)
         return kpg.genKeyPair()
     }
