@@ -4,11 +4,11 @@ package org.vibrant.base
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
-import org.vibrant.base.http.HTTPJsonRPCPeer
-import org.vibrant.base.http.HTTPPeerConfig
-import org.vibrant.base.rpc.json.JSONRPCDefaultProtocol
-import org.vibrant.base.rpc.json.JSONRPCRequest
-import org.vibrant.base.rpc.json.SimpleJSONRPCError
+import org.vibrant.core.node.http.HTTPJsonRPCPeer
+import org.vibrant.core.node.http.HTTPPeerConfig
+import org.vibrant.core.rpc.json.JSONRPCDefaultProtocol
+import org.vibrant.core.rpc.json.JSONRPCRequest
+import org.vibrant.core.rpc.json.SimpleJSONRPCError
 import org.vibrant.core.node.RemoteNode
 import java.net.Socket
 

@@ -1,21 +1,19 @@
 package org.vibrant.base
 
-import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.vibrant.base.http.HTTPPeer
-import org.vibrant.base.http.HTTPPeerConfig
-import org.vibrant.base.http.Request
+import org.vibrant.core.node.http.HTTPPeer
+import org.vibrant.core.node.http.HTTPPeerConfig
+import org.vibrant.core.node.http.HTTPRequest
 import org.vibrant.core.node.RemoteNode
 import java.net.Socket
-import kotlin.coroutines.experimental.suspendCoroutine
 
 class TestHTTPPeer {
 
     val config = object: HTTPPeerConfig("rpc"){}
 
-    private fun createPeer(onRequest: (Request) -> ByteArray): HTTPPeer {
+    private fun createPeer(onRequest: (HTTPRequest) -> ByteArray): HTTPPeer {
         var port = 5000
         while(true){
             port++
@@ -23,7 +21,7 @@ class TestHTTPPeer {
                 Socket("localhost", port).close()
             }catch (e: Exception){
                 val peer = object: HTTPPeer(port, config){
-                    override fun handleRequest(request: Request): ByteArray = onRequest(request)
+                    override fun handleRequest(request: HTTPRequest): ByteArray = onRequest(request)
                 }
                 peer.start()
                 return peer
@@ -54,7 +52,7 @@ class TestHTTPPeer {
     @Test
     fun `Test init`(){
         val peer = object: HTTPPeer(7000, config){
-            override fun handleRequest(request: Request): ByteArray = request.body
+            override fun handleRequest(request: HTTPRequest): ByteArray = request.body
         }
 
         assertEquals(
