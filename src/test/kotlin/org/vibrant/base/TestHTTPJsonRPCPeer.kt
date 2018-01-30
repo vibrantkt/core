@@ -67,7 +67,7 @@ class TestHTTPJsonRPCPeer {
                 errorSome.error
         )
         assertEquals(
-                SimpleJSONRPCError.ERROR_CODE.METHOD_NOT_FOUND,
+                SimpleJSONRPCError.ErrorCode.METHOD_NOT_FOUND,
                 errorSome.error!!.code
         )
 

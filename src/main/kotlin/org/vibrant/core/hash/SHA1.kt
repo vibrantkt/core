@@ -1,6 +1,5 @@
 package org.vibrant.core.hash
 
-import org.vibrant.core.hash.HashProducer
 import java.security.MessageDigest
 
 object SHA1 : HashProducer {

@@ -3,7 +3,7 @@ package org.vibrant.core.database.tangle
 import org.vibrant.core.models.transaction.TransactionPayload
 import org.vibrant.core.models.tangle.TangleModel
 
-abstract class InMemoryTangle<T: TransactionPayload, B: TangleModel> : Tangle<T, TangleVertex<T>, B>(){
+abstract class InMemoryTangle<T: TransactionPayload, out B: TangleModel> : Tangle<T, TangleVertex<T>, B>(){
 
     override fun selectTips(): List<TangleVertex<T>> {
         return this.vertexes.values.map { tx ->

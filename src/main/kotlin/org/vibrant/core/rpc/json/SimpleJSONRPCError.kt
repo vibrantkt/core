@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
 data class SimpleJSONRPCError(
-        @JsonSerialize(using = ErrorCodeSerializer::class) val code: ERROR_CODE,
+        @JsonSerialize(using = ErrorCodeSerializer::class) val code: ErrorCode,
         val message: String,
         val data: String){
 
 
 
-    enum class ERROR_CODE(val value: Int){
+    enum class ErrorCode(val value: Int){
         METHOD_NOT_FOUND(-32601),
         PARSE_ERROR(-32700),
         INVALID_REQUEST(-32600),
@@ -20,7 +20,7 @@ data class SimpleJSONRPCError(
         companion object {
             @JsonCreator
             @JvmStatic
-            fun fromErrorCode(code: String): ERROR_CODE{
+            fun fromErrorCode(code: String): ErrorCode {
                 return values().firstOrNull { it.value == code.toInt()}!!
             }
         }
