@@ -6,7 +6,7 @@ import org.vibrant.core.models.transaction.TransactionPayload
 import org.vibrant.core.database.tangle.InMemoryTangle
 import org.vibrant.core.database.tangle.TangleVertex
 import org.vibrant.core.models.tangle.TangleModel
-import org.vibrant.core.ModelSerializer
+import org.vibrant.core.serialization.ModelSerializer
 import org.vibrant.core.models.Model
 
 class TestInMemoryTangle {

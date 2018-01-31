@@ -6,7 +6,7 @@ import org.vibrant.core.database.blockchain.InstantiateBlockChain
 import org.vibrant.core.node.http.HTTPJsonRPCPeer
 import org.vibrant.core.node.JSONRPCNode
 import org.vibrant.core.rpc.JSONRPCMethod
-import org.vibrant.core.ConcreteModelSerializer
+import org.vibrant.core.serialization.ConcreteModelSerializer
 import org.vibrant.core.models.block.ClassicBlockModel
 import org.vibrant.core.models.blockchain.BlockChainModel
 import org.vibrant.core.models.transaction.HashedTransactionModel
