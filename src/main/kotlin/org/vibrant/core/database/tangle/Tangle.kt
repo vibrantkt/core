@@ -2,7 +2,7 @@ package org.vibrant.core.database.tangle
 
 import org.vibrant.core.models.transaction.TransactionPayload
 import org.vibrant.core.models.tangle.TangleModel
-import org.vibrant.core.ModelProducer
+import org.vibrant.core.producers.ModelProducer
 
 abstract class Tangle<out B: TransactionPayload, T: TangleVertex<B>, out M: TangleModel>: ModelProducer<M>() {
 

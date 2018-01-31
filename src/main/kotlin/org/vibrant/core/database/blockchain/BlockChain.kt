@@ -2,7 +2,7 @@ package org.vibrant.core.database.blockchain
 
 import org.vibrant.core.models.blockchain.BlockChainModel
 import org.vibrant.core.models.block.BlockModel
-import org.vibrant.core.ModelProducer
+import org.vibrant.core.producers.ModelProducer
 
 
 abstract class BlockChain<B: BlockModel, T: BlockChainModel> : ModelProducer<T>(){

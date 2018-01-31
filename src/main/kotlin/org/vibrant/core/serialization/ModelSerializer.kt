@@ -1,4 +1,4 @@
-package org.vibrant.core
+package org.vibrant.core.serialization
 
 import org.vibrant.core.models.Model
 

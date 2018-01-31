@@ -1,5 +1,6 @@
 package org.vibrant.core.rpc.json
 
+import org.vibrant.core.rpc.RPCRequest
 import java.util.*
 
 
@@ -8,7 +9,7 @@ data class JSONRPCRequest(
         val params: Array<Any>,
         val id: Long,
         val version: String = "2.0"
-): JSONRPCEntity(id) {
+): JSONRPCEntity(id), RPCRequest {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
