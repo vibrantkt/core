@@ -35,10 +35,15 @@ interface JSONRPCBlockChainSynchronization<T: HTTPJsonRPCPeer,
         if(localLatestBlock != lastBlock){
             when {
             // next block
-                lastBlock.index - localLatestBlock.index == 1L && lastBlock.previousHash == localLatestBlock.hash -> {
-                    this.chain.addBlock(
-                            lastBlock
-                    )
+                lastBlock.index - localLatestBlock.index == 1L -> {
+                    if(lastBlock.previousHash == localLatestBlock.hash) {
+                        this.chain.addBlock(
+                                lastBlock
+                        )
+                    }else{
+                        logger.info { "Got wrong block(its prev hash is different from mine one)" }
+                        val response = this.node.request(this.node.createRequest("syncWithMe", arrayOf()), remoteNode)
+                    }
                 }
             // block is ahead
                 lastBlock.index > localLatestBlock.index -> {
