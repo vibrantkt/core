@@ -42,7 +42,6 @@ interface JSONRPCBlockChainSynchronization<T: HTTPJsonRPCPeer,
                         )
                     }else{
                         logger.info { "Got wrong block(its prev hash is different from mine one)" }
-                        this.node.request(this.node.createRequest("syncWithMe", arrayOf()), remoteNode)
                     }
                 }
             // block is ahead
